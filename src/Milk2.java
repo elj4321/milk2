@@ -41,7 +41,7 @@ public class Milk2 {
     // Read in number of beads and string of beads
     int beadLen = scanr.nextInt();
     String beadStr = scanr.next();
-    outd("beadLen = " + beadLen);
+//    outd("beadLen = " + beadLen);
     outd("beadStr1 = " + beadStr);
 
 
