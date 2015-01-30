@@ -10,10 +10,11 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-
 import java.io.PrintStream;
 //import java.net.URL;
 //import java.io.BufferedReader;
@@ -21,7 +22,7 @@ import java.io.PrintStream;
 
 public class Milk2 {
 
-  private static boolean debug = true;
+  private static boolean debug = false;
   private static final String task = "milk2";
   private static PrintStream outs = System.out;
 
@@ -36,54 +37,81 @@ public class Milk2 {
     PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outfile)));
 //    o(location.getFile());
     Scanner scanr = new Scanner(new File(infile));
-   
+
+    int maxTime = 999999;
     // Read in number of pairs
     int numPairs = scanr.nextInt();
     outd("numPairs = " + numPairs);
 
 
-    int milked = 0;
-    int notMilked = 0;
-    // Loop over all pairs
+    int minStart = maxTime;
+    int maxEnd = 0;
+
+    // The on/off array
+    int[] milking = new int[maxTime+1];
+
+    // Loop over all pairs and fill in on/off array
     for (int iPair = 1; iPair <= numPairs; iPair++)
     {
+      // Read and store start/end for each farmer, 0 to 999,999 seconds
+      // NOTE: each start and end might both be 0
+      // intervals can overlap
+      // start times not necessarily appearing in ascending order
       int startSecs = scanr.nextInt();
       int endSecs = scanr.nextInt();
       outd("start = " + startSecs + " end = " + endSecs);
+      // If start and end the same then no milking
+      if (startSecs >= endSecs) continue;
+      // Populate the on/off array
+      for (int i = startSecs; i < endSecs; i++) milking[i] = 1;
+      if (startSecs < minStart) minStart = startSecs;
+      if (endSecs > maxEnd) maxEnd = endSecs;
     }
+    outd("min start = " + minStart + ", max end = " + maxEnd);
 
-    // Output results
-    outd("" + milked);
-    outd("" + notMilked);
-    out.println(milked);
-    out.println(notMilked);
-    scanr.close();
-    out.close();
-    System.exit(0);
-  }
+//    StringBuilder sb = new StringBuilder();
 
-  static int getMax(char[] beads, char c1, int direction, int start,
-                    boolean repaint)
-  {
-    int max = 1;
-    int iNext = start;
-    int beadLen = beads.length;
-    for (int j = 0; j < beadLen-1; j++)
+    int maxMilked = 0;
+    int maxUnMilked = 0;
+    boolean milkingNow = true;
+    int currentRun = 0;
+    // Loop over all times
+    for (int i = minStart; i <= maxEnd; i++)
     {
-      iNext = iNext + direction;
-      if (iNext == 0) iNext = beadLen;
-      if (iNext > beadLen) iNext = 1;
-      if (beads[iNext-1] == c1 || beads[iNext-1] == 'w')
+//      sb.append("" + milking[i] +",");
+      if (milking[i] == 1)
       {
-        if (repaint) beads[iNext-1] = c1;
-        max++;
+        // Now milking
+        // If not milking before then update results reset run
+        if (milkingNow == false)
+        {
+          if (currentRun > maxUnMilked) maxUnMilked = currentRun;
+          milkingNow = true;
+          currentRun = 0;
+        }
       }
       else
       {
-        break;
+        // Not milking
+        // If milking before then update results reset run
+        if (milkingNow == true)
+        {
+          if (currentRun > maxMilked) maxMilked = currentRun;
+          milkingNow = false;
+          currentRun = 0;
+        }
       }
+      currentRun++;
     }
-    return max;
+
+//    outd(sb.toString());
+
+    // Output results
+    outd("" + maxMilked + " " + maxUnMilked);
+    out.println(maxMilked + " " + maxUnMilked);
+    scanr.close();
+    out.close();
+    System.exit(0);
   }
  
   static void outd(String msg)
