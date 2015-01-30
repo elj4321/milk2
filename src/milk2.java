@@ -20,7 +20,7 @@ import java.io.PrintStream;
 //import java.io.BufferedReader;
 //import java.io.FileReader;
 
-public class Milk2 {
+public class milk2 {
 
   private static boolean debug = false;
   private static final String task = "milk2";
